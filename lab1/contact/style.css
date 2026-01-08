@@ -1,0 +1,7 @@
+body {
+  font-family: Arial;
+  text-align: center;
+}
+input, textarea {
+  width: 250px;
+}

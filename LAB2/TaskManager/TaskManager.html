@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task Manager</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+
+    .board {
+      display: flex;
+      gap: 20px;
+    }
+
+    .column {
+      background: white;
+      padding: 10px;
+      width: 30%;
+      border-radius: 5px;
+      min-height: 300px;
+    }
+
+    .task {
+      background: #e0e0e0;
+      padding: 10px;
+      margin: 10px 0;
+      cursor: grab;
+    }
+
+    .completed {
+      background: lightgreen;
+    }
+
+    button {
+      padding: 8px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>📝 Task Manager</h2>
+
+<input type="text" id="taskInput" placeholder="Enter Task">
+<button onclick="addTask()">Add Task</button>
+
+<div class="board">
+  <div class="column" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>To Do</h3>
+  </div>
+  <div class="column" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>In Progress</h3>
+  </div>
+  <div class="column" id="completed" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <h3>Completed</h3>
+  </div>
+</div>
+
+<script>
+  function addTask() {
+    const taskText = document.getElementById("taskInput").value;
+    if (!taskText) return;
+
+    const task = document.createElement("div");
+    task.className = "task";
+    task.draggable = true;
+    task.id = "task" + Date.now();
+    task.ondragstart = drag;
+    task.innerHTML = taskText + "<br><small>" + new Date().toLocaleDateString() + "</small>";
+
+    document.querySelector(".column").appendChild(task);
+    document.getElementById("taskInput").value = "";
+  }
+
+  function allowDrop(e) {
+    e.preventDefault();
+  }
+
+  function drag(e) {
+    e.dataTransfer.setData("text", e.target.id);
+  }
+
+  function drop(e) {
+    e.preventDefault();
+    const data = e.dataTransfer.getData("text");
+    const task = document.getElementById(data);
+    e.currentTarget.appendChild(task);
+
+    if (e.currentTarget.id === "completed") {
+      task.classList.add("completed");
+      alert("Task Completed Successfully");
+    }
+  }
+</script>
+
+</body>
+</html>

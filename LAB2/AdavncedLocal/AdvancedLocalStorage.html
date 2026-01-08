@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Management</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 20px;
+    }
+    input {
+      padding: 8px;
+      margin: 5px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid black;
+      padding: 8px;
+      text-align: center;
+    }
+    button {
+      padding: 6px 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>User Registration</h2>
+
+<form onsubmit="registerUser(event)">
+  <input type="text" id="name" placeholder="Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="text" id="mobile" placeholder="Mobile Number" required>
+  <input type="password" id="password" placeholder="Password" required>
+  <button type="submit">Register</button>
+</form>
+
+<button onclick="clearAll()">Clear All Users</button>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Mobile</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody id="userTable"></tbody>
+</table>
+
+<script>
+  function registerUser(e) {
+    e.preventDefault();
+
+    const name = nameInput.value;
+    const email = emailInput.value;
+    const mobile = mobileInput.value;
+    const password = passwordInput.value;
+
+    if (mobile.length !== 10 || password.length < 6) {
+      alert("Invalid Mobile or Password");
+      return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    if (users.some(u => u.email === email)) {
+      alert("Email already exists");
+      return;
+    }
+
+    users.push({ name, email, mobile });
+    localStorage.setItem("users", JSON.stringify(users));
+    displayUsers();
+    e.target.reset();
+  }
+
+  function displayUsers() {
+    const users = JSON.parse(localStorage.getItem("users")) || [];
+    userTable.innerHTML = "";
+
+    users.forEach((u, i) => {
+      userTable.innerHTML += `
+        <tr>
+          <td>${u.name}</td>
+          <td>${u.email}</td>
+          <td>${u.mobile}</td>
+          <td><button onclick="deleteUser(${i})">Delete</button></td>
+        </tr>`;
+    });
+  }
+
+  function deleteUser(i) {
+    let users = JSON.parse(localStorage.getItem("users"));
+    users.splice(i, 1);
+    localStorage.setItem("users", JSON.stringify(users));
+    displayUsers();
+  }
+
+  function clearAll() {
+    localStorage.removeItem("users");
+    displayUsers();
+  }
+
+  displayUsers();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Registration</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e6e6fa; /* Light Lavender Background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container for the form */
+        .container {
+            background-color: #ffffff; /* White Form Background */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            border-top: 5px solid #ff6347; /* Tomato Red accent bar */
+        }
+
+        /* Heading Style */
+        h1 {
+            text-align: center;
+            color: #4b0082; /* Indigo/Deep Purple */
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+
+        /* Form Group Layout */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* Label Styling */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Input and Select Styling */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #c0c0c0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #00ced1; /* Dark Turquoise Focus Color */
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(0, 205, 209, 0.5);
+            outline: none;
+        }
+        
+        /* Select specific styling for a nicer look */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234b0082%22%20d%3D%22M287%20177.3l-131-131c-4.4-4.4-11.6-4.4-16%200l-131%20131c-4.4%204.4-4.4%2011.6%200%2016%204.4%204.4%2011.6%204.4%2016%200l123-123%20123%20123c4.4%204.4%2011.6%204.4%2016%200s4.4-11.6%200-16z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px auto;
+            padding-right: 30px;
+        }
+
+
+        /* Submit Button Styling */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #3cb371; /* Medium Sea Green */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 15px;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            background-color: #2e8b57; /* Darker green on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 College Registration</h1>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label for="regNo">Registration No.:</label>
+                <input type="text" id="regNo" name="regNo" required placeholder="e.g., CGR12345">
+            </div>
+            <div class="form-group">
+                <label for="age">Age:</label>
+                <input type="number" id="age" name="age" min="16" max="99" required placeholder="Must be 16 or older">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="course">Preferred Course:</label>
+                <select id="course" name="course" required>
+                    <option value="" disabled selected>Select a Course</option>
+                    <option value="CS">💻 Computer Science</option>
+                    <option value="EC">📡 Electronics & Communication</option>
+                    <option value="ME">🛠️ Mechanical Engineering</option>
+                    <option value="EE">⚡ Electrical Engineering</option>
+                    <option value="EEE"> Electroncal and engennering</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-btn">Register Now</button>
+        </form>
+    </div>
+
+    <script src="Scripts.js"></script> 
+</body>
+</html>
