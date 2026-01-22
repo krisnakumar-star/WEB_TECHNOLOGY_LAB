@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Multi Step Form</title>
+</head>
+<body>
+
+<div id="progress">Step 1 of 4</div>
+
+<form>
+  <div class="step">
+    <input type="text" id="s1" placeholder="Name">
+  </div>
+
+  <div class="step" style="display:none">
+    <input type="email" id="s2" placeholder="Email">
+  </div>
+
+  <div class="step" style="display:none">
+    <input type="password" id="s3" placeholder="Password">
+  </div>
+
+  <div class="step" style="display:none">
+    <input type="number" id="s4" placeholder="Age">
+  </div>
+
+  <button type="button" onclick="next()">Next</button>
+</form>
+
+<script src="script.js"></script>
+</body>
+</html>

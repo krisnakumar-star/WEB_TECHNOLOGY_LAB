@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Adaptive Registration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Registration Form</h2>
+
+<form id="registerForm">
+  <input type="text" id="name" placeholder="Name"><br>
+
+  <input type="email" id="email" placeholder="Email"><br>
+
+  <input type="password" id="password" placeholder="Password"><br>
+
+  <input type="password" id="confirmPassword" placeholder="Confirm Password"><br>
+
+  <input type="number" id="age" placeholder="Age"><br>
+
+  <select id="role">
+    <option value="">Select Role</option>
+    <option value="student">Student</option>
+    <option value="teacher">Teacher</option>
+    <option value="admin">Admin</option>
+  </select><br>
+
+  <div id="skillsDiv" style="display:none">
+    <input type="text" id="skills" placeholder="Skills (comma separated)">
+  </div>
+
+  <p id="error" style="color:red"></p>
+
+  <button type="submit">Register</button>
+</form>
+
+<script src="script.js"></script>
+</body>
+</html>
