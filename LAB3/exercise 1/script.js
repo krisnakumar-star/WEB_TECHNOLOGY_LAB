@@ -1,45 +1,42 @@
 const form = document.getElementById("registerForm");
 const role = document.getElementById("role");
-const error = document.getElementById("error");
-const skillsDiv = document.getElementById("skillsDiv");
+const skills = document.getElementById("skills");
 
 role.addEventListener("change", () => {
-  skillsDiv.style.display = role.value === "teacher" ? "block" : "none";
+  skills.classList.toggle("hidden", role.value !== "Teacher");
 });
 
 function validateEmail(email) {
-  return email.endsWith("@gmail.com") || email.endsWith("@edu.com");
+  return email.endsWith("@gmail.com");
 }
 
-function validatePassword(password, role) {
-  if (role === "admin") {
-    return password.length >= 10 && /[A-Z]/.test(password) && /\d/.test(password);
-  }
-  return password.length >= 6;
+function validatePassword(pass, role) {
+  if (role === "Admin") return pass.length >= 10 && /\d/.test(pass);
+  return pass.length >= 6;
 }
 
 form.addEventListener("submit", (e) => {
   e.preventDefault();
+  let valid = true;
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const confirm = document.getElementById("confirmPassword").value;
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const confirm = document.getElementById("confirmPassword");
 
-  if (!validateEmail(email)) {
-    error.textContent = "Invalid email domain";
-    return;
+  if (!validateEmail(email.value)) {
+    email.classList.add("error");
+    valid = false;
   }
 
-  if (!validatePassword(password, role.value)) {
-    error.textContent = "Password not strong enough";
-    return;
+  if (!validatePassword(password.value, role.value)) {
+    password.classList.add("error");
+    valid = false;
   }
 
-  if (password !== confirm) {
-    error.textContent = "Passwords do not match";
-    return;
+  if (password.value !== confirm.value) {
+    confirm.classList.add("error");
+    valid = false;
   }
 
-  error.textContent = "";
-  alert("Registration Successful");
+  if (valid) alert("Registration Successful!");
 });

@@ -1,42 +1,37 @@
 let products = [
-  { name: "Laptop", price: 50000, quantity: 1, category: "electronics" },
-  { name: "Book", price: 500, quantity: 2, category: "education" }
+  { name: "Book", price: 200, qty: 1, category: "edu" },
+  { name: "Laptop", price: 50000, qty: 1, category: "tech" }
 ];
 
 function renderCart() {
+  let total = 0;
   const cart = document.getElementById("cart");
   cart.innerHTML = "";
-  let total = 0;
 
   products.forEach((p, i) => {
-    total += p.price * p.quantity;
+    total += p.price * p.qty;
     cart.innerHTML += `
-      <li>
-        ${p.name} (${p.quantity})
-        <button onclick="removeItem(${i})">Remove</button>
-      </li>`;
+      <div class="item">
+        ${p.name} - ₹${p.price}
+        <input type="number" value="${p.qty}" min="1"
+          onchange="updateQty(${i}, this.value)">
+      </div>`;
   });
 
-  document.getElementById("total").textContent = total;
+  document.getElementById("total").innerText = total;
 }
 
-function removeItem(index) {
-  products.splice(index, 1);
+function updateQty(i, qty) {
+  products[i].qty = Number(qty);
   renderCart();
 }
 
 function applyCoupon() {
-  const code = document.getElementById("coupon").value.toUpperCase();
-  let discount = 0;
+  let code = document.getElementById("coupon").value.toUpperCase();
+  let total = Number(document.getElementById("total").innerText);
 
-  if (code.startsWith("SAVE")) {
-    discount = 0.1;
-  }
-
-  let total = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  total -= total * discount;
-
-  document.getElementById("total").textContent = total;
+  if (code === "SAVE10") total *= 0.9;
+  document.getElementById("total").innerText = total;
 }
 
 renderCart();
