@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Record System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Student Record Management</h2>
+
+    <form class="student-form" id="studentForm">
+        <input type="text" id="stuId" placeholder="Student ID (Unique)">
+        <input type="text" id="stuName" placeholder="Student Name">
+        <input type="text" id="stuCourse" placeholder="Course">
+        <input type="number" id="stuMarks" placeholder="Marks (0-100)">
+        
+        <button type="button" id="addBtn" class="btn btn-add" onclick="createStudent()">Add Student</button>
+        <button type="button" id="updateBtn" class="btn btn-update" onclick="saveUpdate()">Update Record</button>
+        
+        <div id="validationError" class="error-msg"></div>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>NAME</th>
+                <th>COURSE</th>
+                <th>MARKS</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody id="studentTableBody">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    let students = [];
+    const tableBody = document.getElementById('studentTableBody');
+    const errorDiv = document.getElementById('validationError');
+
+    // READ: Initialize data using Fetch API
+    window.onload = async () => {
+        try {
+            const response = await fetch('students.json');
+            if (!response.ok) throw new Error("Failed to load JSON file.");
+            
+            students = await response.json();
+            renderTable();
+        } catch (err) {
+            errorDiv.textContent = "JSON Parsing Error: " + err.message;
+        }
+    };
+
+    function renderTable() {
+        tableBody.innerHTML = "";
+        students.forEach(s => {
+            const row = `<tr>
+                <td><strong>${s.id}</strong></td>
+                <td>${s.name}</td>
+                <td>${s.course}</td>
+                <td>${s.marks}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="editStudent('${s.id}')">Edit</button>
+                    <button class="btn btn-delete" onclick="deleteStudent('${s.id}')">Delete</button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    // CREATE: Add new student
+    function createStudent() {
+        const id = document.getElementById('stuId').value.trim();
+        const name = document.getElementById('stuName').value.trim();
+        const course = document.getElementById('stuCourse').value.trim();
+        const marks = document.getElementById('stuMarks').value.trim();
+
+        // VALIDATION
+        if (!id || !name || !course || !marks) {
+            errorDiv.textContent = "All fields are required!";
+            return;
+        }
+        if (students.some(s => s.id === id)) {
+            errorDiv.textContent = "Student ID must be unique!";
+            return;
+        }
+
+        const newStudent = { id, name, course, marks: parseInt(marks) };
+        students.push(newStudent);
+        
+        errorDiv.textContent = "";
+        renderTable();
+        resetForm();
+    }
+
+    // UPDATE (Step 1): Populate form
+    function editStudent(id) {
+        const s = students.find(item => item.id === id);
+        if (s) {
+            document.getElementById('stuId').value = s.id;
+            document.getElementById('stuId').disabled = true;
+            document.getElementById('stuName').value = s.name;
+            document.getElementById('stuCourse').value = s.course;
+            document.getElementById('stuMarks').value = s.marks;
+
+            document.getElementById('addBtn').style.display = 'none';
+            document.getElementById('updateBtn').style.display = 'block';
+        }
+    }
+
+    // UPDATE (Step 2): Save changes
+    function saveUpdate() {
+        const id = document.getElementById('stuId').value;
+        const index = students.findIndex(s => s.id === id);
+
+        if (index !== -1) {
+            students[index].course = document.getElementById('stuCourse').value;
+            students[index].marks = parseInt(document.getElementById('stuMarks').value);
+            
+            renderTable();
+            resetForm();
+        }
+    }
+
+    // DELETE: Remove student
+    function deleteStudent(id) {
+        if (confirm("Are you sure you want to delete this record?")) {
+            students = students.filter(s => s.id !== id);
+            renderTable();
+        }
+    }
+
+    function resetForm() {
+        document.getElementById('stuId').disabled = false;
+        document.getElementById('stuId').value = "";
+        document.getElementById('stuName').value = "";
+        document.getElementById('stuCourse').value = "";
+        document.getElementById('stuMarks').value = "";
+        document.getElementById('addBtn').style.display = 'block';
+        document.getElementById('updateBtn').style.display = 'none';
+        errorDiv.textContent = "";
+    }
+</script>
+
+</body>
+</html>

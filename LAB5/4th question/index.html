@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Inventory System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="header-row">
+        <h2>Inventory Dashboard</h2>
+        <div class="total-value-box">
+            Total Inventory Value: <span id="totalValue">$0.00</span>
+        </div>
+    </div>
+
+    <div class="inventory-grid">
+        <div class="form-panel">
+            <h3>Manage Product</h3>
+            <div class="input-group">
+                <input type="text" id="pId" placeholder="Product ID (e.g. P101)">
+            </div>
+            <div class="input-group">
+                <input type="text" id="pName" placeholder="Product Name">
+            </div>
+            <div class="input-group">
+                <select id="pCategory">
+                    <option value="">Select Category</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Furniture">Furniture</option>
+                    <option value="Stationery">Stationery</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="number" id="pPrice" placeholder="Price ($)">
+            </div>
+            <div class="input-group">
+                <input type="number" id="pStock" placeholder="Stock Quantity">
+            </div>
+            <button onclick="saveProduct()" style="width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">Save Product</button>
+            <button onclick="resetForm()" style="width: 100%; margin-top: 8px; background: none; border: 1px solid #ccc; cursor: pointer; padding: 5px;">Clear Form</button>
+        </div>
+
+        <div>
+            <div style="margin-bottom: 15px;">
+                <input type="text" id="searchCat" placeholder="Search by category..." onkeyup="filterByCategory()">
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    let inventory = [];
+
+    // 1. Fetch JSON Data
+    window.onload = async () => {
+        try {
+            const response = await fetch('inventory.json');
+            if (!response.ok) throw new Error("Could not load database.");
+            inventory = await response.json();
+            renderTable();
+        } catch (err) {
+            console.error(err);
+            alert("Error: " + err.message);
+        }
+    };
+
+    function renderTable(data = inventory) {
+        const tbody = document.getElementById('inventoryBody');
+        tbody.innerHTML = "";
+        let totalVal = 0;
+
+        data.forEach(item => {
+            const isLow = item.stock < 5;
+            totalVal += (item.price * item.stock);
+
+            const row = `
+                <tr class="${isLow ? 'low-stock' : ''}">
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.category}</td>
+                    <td>$${item.price}</td>
+                    <td>
+                        ${item.stock} 
+                        ${isLow ? '<span class="badge badge-low">LOW</span>' : ''}
+                    </td>
+                    <td>
+                        <button onclick="editProduct('${item.id}')">Edit</button>
+                        <button onclick="deleteProduct('${item.id}')" style="color:red">Delete</button>
+                    </td>
+                </tr>`;
+            tbody.innerHTML += row;
+        });
+
+        document.getElementById('totalValue').textContent = `$${totalVal.toLocaleString()}`;
+    }
+
+    // 2. Add / Update Product
+    function saveProduct() {
+        const id = document.getElementById('pId').value.trim();
+        const name = document.getElementById('pName').value.trim();
+        const cat = document.getElementById('pCategory').value;
+        const price = parseFloat(document.getElementById('pPrice').value);
+        const stock = parseInt(document.getElementById('pStock').value);
+
+        if (!id || !name || isNaN(price) || isNaN(stock)) {
+            alert("Please provide valid data in all fields.");
+            return;
+        }
+
+        const existingIdx = inventory.findIndex(p => p.id === id);
+        const productData = { id, name, category: cat, price, stock };
+
+        if (existingIdx > -1) {
+            inventory[existingIdx] = productData;
+        } else {
+            inventory.push(productData);
+        }
+
+        renderTable();
+        resetForm();
+    }
+
+    // 3. Delete Product
+    function deleteProduct(id) {
+        if (confirm("Delete product " + id + "?")) {
+            inventory = inventory.filter(p => p.id !== id);
+            renderTable();
+        }
+    }
+
+    // 4. Edit Product (Load into form)
+    function editProduct(id) {
+        const p = inventory.find(item => item.id === id);
+        document.getElementById('pId').value = p.id;
+        document.getElementById('pId').readOnly = true;
+        document.getElementById('pName').value = p.name;
+        document.getElementById('pCategory').value = p.category;
+        document.getElementById('pPrice').value = p.price;
+        document.getElementById('pStock').value = p.stock;
+    }
+
+    // 5. Search by Category
+    function filterByCategory() {
+        const query = document.getElementById('searchCat').value.toLowerCase();
+        const filtered = inventory.filter(p => p.category.toLowerCase().includes(query));
+        renderTable(filtered);
+    }
+
+    function resetForm() {
+        document.getElementById('pId').readOnly = false;
+        document.querySelectorAll('.form-panel input, .form-panel select').forEach(i => i.value = "");
+    }
+</script>
+</body>
+</html>
