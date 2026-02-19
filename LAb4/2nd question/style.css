@@ -1,0 +1,62 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    padding-top: 50px;
+}
+
+.search-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+h2 { color: #333; text-align: center; }
+
+.search-box {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    box-sizing: border-box;
+}
+
+input:focus { border-color: #007bff; }
+
+/* Product Cards */
+#resultsList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.product-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.product-info h4 { margin: 0; color: #007bff; }
+.product-info p { margin: 5px 0 0; font-size: 0.85rem; color: #666; }
+.product-price { font-weight: bold; color: #28a745; }
+
+/* Status Messages */
+.status-msg { text-align: center; color: #888; margin-top: 20px; }
+.error-msg { color: #dc3545; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System (AJAX CRUD)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Student Management System</h2>
+
+    <div id="message"></div>
+
+    <form class="student-form" id="studentForm">
+        <input type="hidden" id="editIndex"> <input type="text" id="studId" placeholder="Student ID (e.g. S101)" required>
+        <input type="text" id="studName" placeholder="Full Name" required>
+        <input type="text" id="studDept" placeholder="Department" required>
+        <input type="number" id="studMarks" placeholder="Marks" required min="0" max="100">
+
+        <div class="form-actions">
+            <button type="submit" id="addBtn" class="btn-add">Add Student</button>
+            <button type="button" id="updateBtn" class="btn-update">Update Student</button>
+            <button type="button" id="clearBtn" class="btn-clear">Clear</button>
+        </div>
+    </form>
+
+    <table id="studentTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Marks</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // --- Configuration ---
+    // In a real app, this would be: const API_URL = "http://api.yoursite.com/students";
+    // We will simulate the JSON file interaction.
+    const DATA_FILE = 'students.json'; 
+    let students = [];
+
+    // DOM Elements
+    const form = document.getElementById('studentForm');
+    const tableBody = document.getElementById('tableBody');
+    const msgDiv = document.getElementById('message');
+    const addBtn = document.getElementById('addBtn');
+    const updateBtn = document.getElementById('updateBtn');
+
+    // --- 1. READ (Fetch Students) ---
+    async function loadStudents() {
+        try {
+            const response = await fetch(DATA_FILE);
+            
+            // Handle HTTP status codes
+            if (response.status === 404) throw new Error("Database file not found (404)");
+            if (response.status === 500) throw new Error("Server error (500)");
+            
+            students = await response.json();
+            renderTable();
+            showMessage("Data loaded successfully", "success");
+        } catch (error) {
+            showMessage(error.message, "error");
+        }
+    }
+
+    // --- 2. CREATE ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const newStudent = {
+            id: document.getElementById('studId').value,
+            name: document.getElementById('studName').value,
+            dept: document.getElementById('studDept').value,
+            marks: document.getElementById('studMarks').value
+        };
+
+        // AJAX Simulation: Check if ID exists
+        if (students.find(s => s.id === newStudent.id)) {
+            showMessage("Error: ID already exists!", "error");
+            return;
+        }
+
+        // Simulate POST request
+        students.push(newStudent);
+        renderTable();
+        form.reset();
+        showMessage("Student added successfully!", "success");
+    });
+
+    // --- 3. UPDATE (Step 1: Fill form) ---
+    function editStudent(id) {
+        const student = students.find(s => s.id === id);
+        if (!student) return;
+
+        document.getElementById('studId').value = student.id;
+        document.getElementById('studId').disabled = true; // ID shouldn't change
+        document.getElementById('studName').value = student.name;
+        document.getElementById('studDept').value = student.dept;
+        document.getElementById('studMarks').value = student.marks;
+
+        addBtn.style.display = 'none';
+        updateBtn.style.display = 'block';
+    }
+
+    // --- 3. UPDATE (Step 2: Save) ---
+    updateBtn.addEventListener('click', () => {
+        const id = document.getElementById('studId').value;
+        const index = students.findIndex(s => s.id === id);
+
+        if (index !== -1) {
+            students[index] = {
+                id: id,
+                name: document.getElementById('studName').value,
+                dept: document.getElementById('studDept').value,
+                marks: document.getElementById('studMarks').value
+            };
+            
+            renderTable();
+            resetForm();
+            showMessage("Record updated successfully!", "success");
+        }
+    });
+
+    // --- 4. DELETE ---
+    function deleteStudent(id) {
+        if (confirm("Are you sure you want to delete this record?")) {
+            students = students.filter(s => s.id !== id);
+            renderTable();
+            showMessage("Student removed.", "success");
+        }
+    }
+
+    // --- UI Helpers ---
+    function renderTable() {
+        tableBody.innerHTML = '';
+        students.forEach(s => {
+            const row = `<tr>
+                <td>${s.id}</td>
+                <td>${s.name}</td>
+                <td>${s.dept}</td>
+                <td>${s.marks}</td>
+                <td>
+                    <button class="btn-edit" onclick="editStudent('${s.id}')">Edit</button>
+                    <button class="btn-delete" onclick="deleteStudent('${s.id}')">Delete</button>
+                </td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    function showMessage(text, type) {
+        msgDiv.textContent = text;
+        msgDiv.className = type === 'success' ? 'msg-success' : 'msg-error';
+        setTimeout(() => msgDiv.className = '', 3000);
+    }
+
+    function resetForm() {
+        form.reset();
+        document.getElementById('studId').disabled = false;
+        addBtn.style.display = 'block';
+        updateBtn.style.display = 'none';
+    }
+
+    document.getElementById('clearBtn').addEventListener('click', resetForm);
+
+    // Initial Load
+    window.onload = loadStudents;
+
+</script>
+</body>
+</html>

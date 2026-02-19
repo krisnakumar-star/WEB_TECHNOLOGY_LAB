@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AJAX Weather Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="weather-card">
+    <h2>Weather Dashboard</h2>
+    <div class="search-box">
+        <input type="text" id="cityInput" placeholder="Enter city name...">
+        <button id="searchBtn">Search</button>
+    </div>
+
+    <div id="loader" class="loader"></div>
+    <div id="errorBox" class="error hidden"></div>
+
+    <div id="weatherDisplay" class="weather-info hidden">
+        <h3 id="cityName">City Name</h3>
+        <div class="temp"><span id="tempValue">0</span>°C</div>
+        <div class="desc" id="description">Clear Sky</div>
+        <div class="details">
+            <div>
+                <strong>Humidity</strong><br>
+                <span id="humidityValue">0</span>%
+            </div>
+            <div>
+                <strong>Condition</strong><br>
+                <span id="mainCond">Cloudy</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with a real key from openweathermap.org
+    
+    // Elements
+    const cityInput = document.getElementById('cityInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const loader = document.getElementById('loader');
+    const errorBox = document.getElementById('errorBox');
+    const weatherDisplay = document.getElementById('weatherDisplay');
+
+    // Requirement: Cache last searched city result
+    let cache = {
+        cityName: null,
+        data: null
+    };
+
+    searchBtn.addEventListener('click', () => {
+        const city = cityInput.value.trim();
+        if (city) {
+            getWeather(city);
+        }
+    });
+
+    async function getWeather(city) {
+        // 1. Check Cache first
+        if (cache.cityName === city.toLowerCase()) {
+            console.log("Loading from cache...");
+            displayData(cache.data);
+            return;
+        }
+
+        // 2. Prepare UI
+        showLoading(true);
+        hideError();
+
+        try {
+            // Using standard Fetch for GET request with query params
+            const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`);
+
+            // 3. Handle Status Codes
+            if (response.status === 404) {
+                throw new Error("City not found. Please check spelling.");
+            } else if (!response.ok) {
+                throw new Error("Server error or invalid API key.");
+            }
+
+            const data = await response.json();
+
+            // 4. Update Cache
+            cache.cityName = city.toLowerCase();
+            cache.data = data;
+
+            // 5. Update UI
+            displayData(data);
+
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function displayData(data) {
+        weatherDisplay.classList.remove('hidden');
+        document.getElementById('cityName').textContent = `${data.name}, ${data.sys.country}`;
+        document.getElementById('tempValue').textContent = Math.round(data.main.temp);
+        document.getElementById('description').textContent = data.weather[0].description;
+        document.getElementById('humidityValue').textContent = data.main.humidity;
+        document.getElementById('mainCond').textContent = data.weather[0].main;
+    }
+
+    function showLoading(isLoading) {
+        loader.style.display = isLoading ? 'block' : 'none';
+        if (isLoading) weatherDisplay.classList.add('hidden');
+    }
+
+    function showError(msg) {
+        errorBox.textContent = msg;
+        errorBox.classList.remove('hidden');
+        weatherDisplay.classList.add('hidden');
+    }
+
+    function hideError() {
+        errorBox.classList.add('hidden');
+    }
+</script>
+
+</body>
+</html>

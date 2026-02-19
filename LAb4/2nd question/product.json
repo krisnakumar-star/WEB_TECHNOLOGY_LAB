@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Mechanical Keyboard", "price": 89.99, "category": "Electronics" },
+  { "id": 2, "name": "Wireless Mouse", "price": 25.50, "category": "Electronics" },
+  { "id": 3, "name": "Coffee Mug", "price": 12.00, "category": "Home & Kitchen" },
+  { "id": 4, "name": "Leather Journal", "price": 22.00, "category": "Office" },
+  { "id": 5, "name": "Noise Cancelling Headphones", "price": 199.99, "category": "Electronics" },
+  { "id": 6, "name": "Desk Lamp", "price": 35.00, "category": "Home & Kitchen" }
+]

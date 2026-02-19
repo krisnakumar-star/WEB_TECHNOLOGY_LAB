@@ -1,0 +1,101 @@
+/* Layout & Typography */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.registration-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 350px;
+}
+
+h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box; /* Crucial for padding */
+}
+
+input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+/* Status Indicators */
+#feedback {
+    font-size: 0.85rem;
+    margin-top: 6px;
+    min-height: 1.2em; /* Prevents layout jumping */
+    transition: all 0.2s ease;
+}
+
+.error-text { color: #d93025; }
+.success-text { color: #188038; }
+
+.error-border { border-color: #d93025 !important; }
+.success-border { border-color: #188038 !important; }
+
+/* Loading Spinner */
+.loader {
+    position: absolute;
+    right: 10px;
+    top: 38px;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover { background-color: #2980b9; }
+button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+.hidden { display: none; }

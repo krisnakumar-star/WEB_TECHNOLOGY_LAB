@@ -1,0 +1,4 @@
+[
+    { "id": "S101", "name": "Alice Johnson", "dept": "Computer Science", "marks": 85 },
+    { "id": "S102", "name": "Bob Smith", "dept": "Electrical", "marks": 78 }
+]

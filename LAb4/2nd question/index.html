@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Product Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="search-container">
+    <h2>Product Catalog</h2>
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search for products (e.g. 'Keyboard')...">
+    </div>
+
+    <div id="status" class="status-msg">Type to start searching...</div>
+    <div id="resultsList"></div>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const resultsList = document.getElementById('resultsList');
+    const status = document.getElementById('status');
+
+    let debounceTimer;
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        
+        // Clear previous timer and results
+        clearTimeout(debounceTimer);
+        resultsList.innerHTML = '';
+
+        if (query === '') {
+            status.textContent = "Type to start searching...";
+            return;
+        }
+
+        status.textContent = "Searching...";
+
+        // Debounce: Wait 400ms after last keystroke
+        debounceTimer = setTimeout(() => {
+            fetchProducts(query);
+        }, 400);
+    });
+
+    async function fetchProducts(query) {
+        try {
+            const response = await fetch('products.json');
+            
+            if (!response.ok) throw new Error("Could not fetch data.");
+
+            const products = await response.json();
+            
+            // Filter products based on name or category
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                p.category.toLowerCase().includes(query)
+            );
+
+            displayResults(filtered);
+        } catch (error) {
+            status.innerHTML = `<span class="error-msg">Error: ${error.message}</span>`;
+        }
+    }
+
+    function displayResults(results) {
+        resultsList.innerHTML = '';
+        
+        if (results.length === 0) {
+            status.textContent = "No results found.";
+            return;
+        }
+
+        status.textContent = `Found ${results.length} results:`;
+
+        results.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <div class="product-info">
+                    <h4>${product.name}</h4>
+                    <p>Category: ${product.category}</p>
+                </div>
+                <div class="product-price">$${product.price.toFixed(2)}</div>
+            `;
+            resultsList.appendChild(card);
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="registration-card">
+        <h2>Create Account</h2>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div style="position: relative;">
+                    <input type="text" id="username" placeholder="Type a username..." autocomplete="off">
+                    <div id="loader" class="loader hidden"></div>
+                </div>
+                <div id="feedback"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="••••••••">
+            </div>
+
+            <button type="submit" id="submitBtn">Register</button>
+        </form>
+    </div>
+
+    <script>
+        const usernameInput = document.getElementById('username');
+        const feedback = document.getElementById('feedback');
+        const loader = document.getElementById('loader');
+        const form = document.getElementById('registrationForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        let isAvailable = false;
+        let debounceTimer;
+
+        // Listen for typing
+        usernameInput.addEventListener('input', () => {
+            const username = usernameInput.value.trim();
+            
+            // 1. Reset UI State immediately
+            clearTimeout(debounceTimer);
+            resetValidationUI();
+
+            if (username === "") {
+                feedback.textContent = "";
+                return;
+            }
+
+            if (username.length < 3) {
+                showError("Minimum 3 characters required");
+                return;
+            }
+
+            // 2. Start Debounce (wait 500ms before calling "server")
+            feedback.textContent = "Verifying...";
+            feedback.className = ""; 
+            debounceTimer = setTimeout(() => {
+                checkAvailability(username);
+            }, 500);
+        });
+
+        async function checkAvailability(username) {
+            // Show loading spinner
+            loader.classList.remove('hidden');
+
+            try {
+                // Fetch from your local JSON file
+                const response = await fetch('users.json');
+                const data = await response.json();
+
+                // Simulate a slight network delay for the "loading" effect
+                await new Promise(resolve => setTimeout(resolve, 400));
+
+                const isTaken = data.takenUsernames.some(u => u.toLowerCase() === username.toLowerCase());
+
+                if (isTaken) {
+                    showError("Username already taken");
+                    isAvailable = false;
+                } else {
+                    showSuccess("Username available!");
+                    isAvailable = true;
+                }
+            } catch (err) {
+                showError("Error connecting to server");
+                console.error(err);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // UI Helper Functions
+        function showError(msg) {
+            feedback.textContent = msg;
+            feedback.className = "error-text";
+            usernameInput.className = "error-border";
+            isAvailable = false;
+        }
+
+        function showSuccess(msg) {
+            feedback.textContent = msg;
+            feedback.className = "success-text";
+            usernameInput.className = "success-border";
+        }
+
+        function resetValidationUI() {
+            feedback.textContent = "";
+            usernameInput.className = "";
+            isAvailable = false;
+        }
+
+        // 3. Prevent submission if username is not valid
+        form.addEventListener('submit', (e) => {
+            if (!isAvailable) {
+                e.preventDefault();
+                alert("Please choose an available username first.");
+            } else {
+                e.preventDefault(); // Stop actual redirect for this demo
+                alert("Success! Your account has been created.");
+            }
+        });
+    </script>
+</body>
+</html>
