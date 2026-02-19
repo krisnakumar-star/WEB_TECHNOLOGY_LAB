@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management System - XML AJAX</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Employee Management (XML CRUD)</h2>
+    <div id="msg"></div>
+
+    <div class="form-group">
+        <input type="text" id="empId" placeholder="Employee ID (e.g. E003)">
+        <input type="text" id="empName" placeholder="Full Name">
+        <input type="text" id="empDept" placeholder="Department">
+        <input type="number" id="empSalary" placeholder="Salary">
+        <button id="mainBtn" class="btn btn-add" onclick="saveEmployee()" disabled>Loading Data...</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Dept</th>
+                <th>Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="empTableBody">
+            <tr><td colspan="5" style="text-align:center">Fetching records...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    let xmlDoc = null;
+    const mainBtn = document.getElementById("mainBtn");
+
+    // Start loading the XML as soon as the window opens
+    window.onload = loadXML;
+
+    function loadXML() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "employees.xml", true);
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    xmlDoc = xhr.responseXML;
+                    
+                    // Check if XML actually parsed correctly
+                    if (!xmlDoc || xmlDoc.getElementsByTagName("parsererror").length > 0) {
+                        showStatus("Error: XML file is malformed!", "error");
+                    } else {
+                        mainBtn.disabled = false;
+                        mainBtn.textContent = "Save Employee";
+                        renderTable();
+                    }
+                } else {
+                    showStatus("Failed to load XML. Use a Local Server (Live Server).", "error");
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("empTableBody");
+        tbody.innerHTML = "";
+        
+        const employees = xmlDoc.getElementsByTagName("employee");
+        
+        if (employees.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='5' style='text-align:center'>No employees found.</td></tr>";
+            return;
+        }
+
+        for (let i = 0; i < employees.length; i++) {
+            const id = getTagValue(employees[i], "id");
+            const name = getTagValue(employees[i], "name");
+            const dept = getTagValue(employees[i], "dept");
+            const salary = getTagValue(employees[i], "salary");
+
+            const row = `<tr>
+                <td>${id}</td>
+                <td>${name}</td>
+                <td>${dept}</td>
+                <td>$${Number(salary).toLocaleString()}</td>
+                <td>
+                    <button class="btn btn-edit" onclick="prepareUpdate('${id}')">Edit</button>
+                    <button class="btn btn-delete" onclick="deleteEmployee('${id}')">Delete</button>
+                </td>
+            </tr>`;
+            tbody.innerHTML += row;
+        }
+    }
+
+    // Helper to safely get text from a tag
+    function getTagValue(parent, tagName) {
+        const element = parent.getElementsByTagName(tagName)[0];
+        return element ? element.textContent : "";
+    }
+
+    function saveEmployee() {
+        const idVal = document.getElementById("empId").value.trim();
+        const nameVal = document.getElementById("empName").value.trim();
+        const deptVal = document.getElementById("empDept").value.trim();
+        const salVal = document.getElementById("empSalary").value.trim();
+
+        if (!idVal || !nameVal) {
+            showStatus("ID and Name are mandatory", "error");
+            return;
+        }
+
+        const existingEmp = findEmployeeById(idVal);
+
+        if (existingEmp) {
+            // Update mode
+            existingEmp.getElementsByTagName("name")[0].textContent = nameVal;
+            existingEmp.getElementsByTagName("dept")[0].textContent = deptVal;
+            existingEmp.getElementsByTagName("salary")[0].textContent = salVal;
+            showStatus("Employee updated successfully", "success");
+        } else {
+            // Create mode
+            const newEmp = xmlDoc.createElement("employee");
+            newEmp.appendChild(createNewElement("id", idVal));
+            newEmp.appendChild(createNewElement("name", nameVal));
+            newEmp.appendChild(createNewElement("dept", deptVal));
+            newEmp.appendChild(createNewElement("salary", salVal));
+            
+            xmlDoc.documentElement.appendChild(newEmp);
+            showStatus("Employee added to local memory", "success");
+        }
+        
+        renderTable();
+        clearForm();
+    }
+
+    function deleteEmployee(id) {
+        const emp = findEmployeeById(id);
+        if (emp && confirm("Delete employee " + id + "?")) {
+            emp.parentNode.removeChild(emp);
+            renderTable();
+            showStatus("Employee removed", "success");
+        }
+    }
+
+    function findEmployeeById(id) {
+        if (!xmlDoc) return null;
+        const employees = xmlDoc.getElementsByTagName("employee");
+        for (let i = 0; i < employees.length; i++) {
+            if (getTagValue(employees[i], "id") === id) return employees[i];
+        }
+        return null;
+    }
+
+    function createNewElement(tag, text) {
+        const el = xmlDoc.createElement(tag);
+        el.textContent = text;
+        return el;
+    }
+
+    function prepareUpdate(id) {
+        const emp = findEmployeeById(id);
+        if (emp) {
+            document.getElementById("empId").value = getTagValue(emp, "id");
+            document.getElementById("empName").value = getTagValue(emp, "name");
+            document.getElementById("empDept").value = getTagValue(emp, "dept");
+            document.getElementById("empSalary").value = getTagValue(emp, "salary");
+            
+            // Highlight the button for update mode
+            mainBtn.textContent = "Update Employee Details";
+            document.getElementById("empId").disabled = true;
+            window.scrollTo(0,0);
+        }
+    }
+
+    function clearForm() {
+        document.getElementById("empId").value = "";
+        document.getElementById("empId").disabled = false;
+        document.getElementById("empName").value = "";
+        document.getElementById("empDept").value = "";
+        document.getElementById("empSalary").value = "";
+        mainBtn.textContent = "Save Employee";
+    }
+
+    function showStatus(msg, type) {
+        const statusDiv = document.getElementById("msg");
+        statusDiv.textContent = msg;
+        statusDiv.className = type;
+        setTimeout(() => statusDiv.className = "", 4000);
+    }
+</script>
+</body>
+</html>

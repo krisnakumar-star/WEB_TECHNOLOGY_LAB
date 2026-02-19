@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Library Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2 style="color: var(--primary)">BookManager</h2>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        
+        <div class="input-group">
+            <label>Search Library</label>
+            <input type="text" id="searchInput" placeholder="Search title or author..." onkeyup="filterTable()">
+        </div>
+
+        <div id="bookForm">
+            <h3>Add/Edit Book</h3>
+            <div class="input-group">
+                <label>Book ID</label>
+                <input type="text" id="bookId" placeholder="B001">
+            </div>
+            <div class="input-group">
+                <label>Title</label>
+                <input type="text" id="bookTitle" placeholder="The Hobbit">
+            </div>
+            <div class="input-group">
+                <label>Author</label>
+                <input type="text" id="bookAuthor" placeholder="J.R.R. Tolkien">
+            </div>
+            <div class="input-group">
+                <label>Availability</label>
+                <select id="bookStatus">
+                    <option value="Available">Available</option>
+                    <option value="Borrowed">Borrowed</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="saveBtn" onclick="processBook()">Save to Library</button>
+            <button class="btn" style="width:100%; margin-top:5px;" onclick="resetForm()">Reset</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Books</h3>
+                <p id="statTotal">0</p>
+            </div>
+            <div class="stat-card" style="border-color: var(--success)">
+                <h3>Available</h3>
+                <p id="statAvailable">0</p>
+            </div>
+            <div class="stat-card" style="border-color: var(--danger)">
+                <h3>Borrowed</h3>
+                <p id="statBorrowed">0</p>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>BOOK ID</th>
+                        <th>TITLE</th>
+                        <th>AUTHOR</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="bookList"></tbody>
+            </table>
+        </div>
+    </div>
+<script>
+    let xmlDoc = null;
+    const saveBtn = document.getElementById("saveBtn");
+
+    // Load XML on startup
+    window.onload = function() {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "books.xml", true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    xmlDoc = xhr.responseXML;
+                    if (!xmlDoc || xmlDoc.getElementsByTagName("parsererror").length > 0) {
+                        alert("Error: books.xml is malformed or empty.");
+                    } else {
+                        saveBtn.disabled = false;
+                        renderTable();
+                    }
+                } else {
+                    alert("Cannot load books.xml. Please use a Local Server.");
+                }
+            }
+        };
+        xhr.send();
+    };
+
+    // --- NEW: The missing renderTable function ---
+    function renderTable() {
+        const tbody = document.getElementById("bookList");
+        if (!xmlDoc) return;
+        
+        const books = xmlDoc.getElementsByTagName("book");
+        tbody.innerHTML = "";
+
+        let availableCount = 0;
+        let borrowedCount = 0;
+
+        for (let i = 0; i < books.length; i++) {
+            const id = getVal(books[i], "id");
+            const title = getVal(books[i], "title");
+            const author = getVal(books[i], "author");
+            const status = getVal(books[i], "status");
+
+            if (status === "Available") availableCount++; else borrowedCount++;
+
+            const row = `<tr>
+                <td><strong>${id}</strong></td>
+                <td>${title}</td>
+                <td>${author}</td>
+                <td><span class="badge ${status === 'Available' ? 'badge-available' : 'badge-borrowed'}">${status}</span></td>
+                <td>
+                    <button class="btn btn-edit" onclick="editBook('${id}')">Edit</button>
+                    <button class="btn btn-danger" onclick="deleteBook('${id}')">Delete</button>
+                </td>
+            </tr>`;
+            tbody.innerHTML += row;
+        }
+
+        // Update Stats
+        document.getElementById("statTotal").textContent = books.length;
+        document.getElementById("statAvailable").textContent = availableCount;
+        document.getElementById("statBorrowed").textContent = borrowedCount;
+    }
+
+    // Helper to get text from tags
+    function getVal(parent, tag) {
+        const el = parent.getElementsByTagName(tag)[0];
+        return el ? el.textContent : "";
+    }
+
+    function findBook(id) {
+        if (!xmlDoc) return null;
+        const books = xmlDoc.getElementsByTagName("book");
+        for (let b of books) {
+            if (getVal(b, "id") === id) return b;
+        }
+        return null;
+    }
+
+    function processBook() {
+        if (!xmlDoc) return;
+
+        const id = document.getElementById("bookId").value.trim();
+        const title = document.getElementById("bookTitle").value.trim();
+        const author = document.getElementById("bookAuthor").value.trim();
+        const status = document.getElementById("bookStatus").value;
+
+        if (!id || !title) {
+            alert("ID and Title are required!");
+            return;
+        }
+
+        const existing = findBook(id);
+        if (existing) {
+            existing.getElementsByTagName("status")[0].textContent = status;
+            existing.getElementsByTagName("title")[0].textContent = title;
+            existing.getElementsByTagName("author")[0].textContent = author;
+        } else {
+            const newBook = xmlDoc.createElement("book");
+            
+            const idNode = xmlDoc.createElement("id"); idNode.textContent = id;
+            const titleNode = xmlDoc.createElement("title"); titleNode.textContent = title;
+            const authorNode = xmlDoc.createElement("author"); authorNode.textContent = author;
+            const statusNode = xmlDoc.createElement("status"); statusNode.textContent = status;
+            
+            newBook.appendChild(idNode);
+            newBook.appendChild(titleNode);
+            newBook.appendChild(authorNode);
+            newBook.appendChild(statusNode);
+            
+            xmlDoc.documentElement.appendChild(newBook);
+        }
+        renderTable();
+        resetForm();
+    }
+
+    // --- NEW: The missing Utility functions ---
+    function editBook(id) {
+        const b = findBook(id);
+        if (b) {
+            document.getElementById("bookId").value = getVal(b, "id");
+            document.getElementById("bookId").disabled = true;
+            document.getElementById("bookTitle").value = getVal(b, "title");
+            document.getElementById("bookAuthor").value = getVal(b, "author");
+            document.getElementById("bookStatus").value = getVal(b, "status");
+            saveBtn.textContent = "Update Record";
+        }
+    }
+
+    function deleteBook(id) {
+        const b = findBook(id);
+        if (b && confirm("Delete this book?")) {
+            b.parentNode.removeChild(b);
+            renderTable();
+        }
+    }
+
+    function filterTable() {
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.getElementById("bookList").getElementsByTagName("tr");
+        for (let row of rows) {
+            row.style.display = row.textContent.toLowerCase().includes(query) ? "" : "none";
+        }
+    }
+
+    function resetForm() {
+        document.getElementById("bookId").disabled = false;
+        document.getElementById("bookId").value = "";
+        document.getElementById("bookTitle").value = "";
+        document.getElementById("bookAuthor").value = "";
+        document.getElementById("bookStatus").value = "Available";
+        saveBtn.textContent = "Save to Library";
+    }
+</script>
+</body>
+</html>
